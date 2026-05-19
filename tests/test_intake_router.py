@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from agents.intake_router import intake_router_agent
 
 ## I tested two inputs. The first one was a normal customer request, and the second one is a prompt injection attempt.
