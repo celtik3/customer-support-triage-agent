@@ -29,6 +29,56 @@ def detect_prompt_injection(text: str) -> bool:
     return False
 
 
+def rule_based_classification(text: str) -> str | None:
+    lower_text = text.lower()
+
+    health_safety_keywords = [
+        "severe allergy",
+        "allergy",
+        "allergic",
+        "anaphylaxis",
+        "peanut",
+        "hazard",
+        "unsafe",
+        "injury",
+        "emergency",
+    ]
+
+    mobility_keywords = [
+        "wheelchair",
+        "mobility",
+        "walker",
+        "accessible",
+        "transportation",
+        "stairs",
+    ]
+
+    dietary_keywords = [
+        "low-sodium",
+        "diet",
+        "meal",
+        "food preference",
+        "vegetarian",
+        "vegan",
+        "gluten-free",
+        "dairy-free"
+    ]
+
+    for keyword in health_safety_keywords:
+        if keyword in lower_text:
+            return "health_safety"
+
+    for keyword in mobility_keywords:
+        if keyword in lower_text:
+            return "mobility_accessibility"
+
+    for keyword in dietary_keywords:
+        if keyword in lower_text:
+            return "dietary_constraint"
+
+    return None
+
+
 def classify_request(text: str) -> str:
     """Use the LLM to classify the customer request."""
     prompt = f"""
@@ -64,7 +114,12 @@ def intake_router_agent(state: dict) -> dict:
     if injection_detected:
         classification = "security_risk"
     else:
-        classification = classify_request(sanitized_request)
+        rule_classification = rule_based_classification(sanitized_request)
+
+        if rule_classification:
+            classification = rule_classification
+        else:
+            classification = classify_request(sanitized_request)
 
     return {
         **state,

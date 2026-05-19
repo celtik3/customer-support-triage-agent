@@ -3,6 +3,7 @@ from core.state import AgentState
 
 from agents.intake_router import intake_router_agent
 from agents.documentation_specialist import documentation_specialist_agent
+from agents.escalation_agent import escalation_agent
 from agents.guardrail_critic import guardrail_critic_agent
 
 
@@ -11,7 +12,7 @@ def route_after_intake(state: dict):
     Decide next node after intake routing.
     """
     if state.get("injection_detected"):
-        return "guardrail_critic"
+        return "escalation_agent"
 
     return "documentation_specialist"
 
@@ -21,6 +22,7 @@ builder = StateGraph(AgentState)
 ## Nodes
 builder.add_node("intake_router", intake_router_agent)
 builder.add_node("documentation_specialist", documentation_specialist_agent)
+builder.add_node("escalation_agent", escalation_agent)
 builder.add_node("guardrail_critic", guardrail_critic_agent)
 
 ## Entry
@@ -32,14 +34,13 @@ builder.add_conditional_edges(
     route_after_intake,
     {
         "documentation_specialist": "documentation_specialist",
-        "guardrail_critic": "guardrail_critic",
+        "escalation_agent": "escalation_agent",
     },
 )
 
-## Normal flow
-builder.add_edge("documentation_specialist", "guardrail_critic")
-
-## End
+## Normal flow to the End
+builder.add_edge("documentation_specialist", "escalation_agent")
+builder.add_edge("escalation_agent", "guardrail_critic")
 builder.add_edge("guardrail_critic", END)
 
 graph = builder.compile()

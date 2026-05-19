@@ -15,6 +15,7 @@ This system demonstrates a multi-agent architecture for customer support triage.
 Agents:
 - Intake Router Agent
 - Documentation Specialist Agent
+- Escalation Agent
 - Guardrail Critic Agent
 """)
 
@@ -63,6 +64,9 @@ if st.button("Run Triage Analysis"):
                 "safety_review": None,
                 "final_response": None,
                 "injection_detected": None,
+                "escalation_required": None,
+                "recommended_team": None,
+                "escalation_reason": None,
                 "error": None,
             }
 
@@ -72,6 +76,11 @@ if st.button("Run Triage Analysis"):
 
         st.subheader("Classification")
         st.write(result["classification"])
+
+        st.subheader("Escalation Decision")
+        st.write("Escalation Required:", result["escalation_required"])
+        st.write("Recommended Team:", result["recommended_team"])
+        st.write("Reason:", result["escalation_reason"])
 
         st.subheader("Sanitized Request")
         st.write(result["sanitized_request"])
