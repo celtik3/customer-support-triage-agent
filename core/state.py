@@ -1,4 +1,4 @@
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, List
 
 
 class AgentState(TypedDict):
@@ -13,4 +13,6 @@ class AgentState(TypedDict):
     escalation_required: Optional[bool]
     recommended_team: Optional[str]
     escalation_reason: Optional[str]
+    confidence_score: Optional[float]
+    agent_trace: Optional[List[str]]
     error: Optional[str]

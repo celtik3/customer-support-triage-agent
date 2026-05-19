@@ -60,9 +60,15 @@ Rules:
         if line.startswith("Reason:"):
             escalation_reason = line.replace("Reason:", "").strip()
 
+    trace = state.get("agent_trace") or []
+    trace.append(
+        f"Escalation Agent: escalation_required={escalation_required}, recommended_team='{recommended_team}'"
+    )
+    
     return {
         **state,
         "escalation_required": escalation_required,
         "recommended_team": recommended_team,
         "escalation_reason": escalation_reason,
+        "agent_trace": trace,
     }

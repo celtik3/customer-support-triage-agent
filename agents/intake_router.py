@@ -111,6 +111,8 @@ def intake_router_agent(state: dict) -> dict:
     sanitized_request = redact_pii(raw_request)
     injection_detected = detect_prompt_injection(raw_request)
 
+    rule_classification = None
+
     if injection_detected:
         classification = "security_risk"
     else:
@@ -121,9 +123,23 @@ def intake_router_agent(state: dict) -> dict:
         else:
             classification = classify_request(sanitized_request)
 
+    if injection_detected:
+        confidence_score = 0.99
+    elif rule_classification:
+        confidence_score = 0.95
+    else:
+        confidence_score = 0.80
+
+    trace = state.get("agent_trace") or []
+    trace.append(
+        f"Intake Router: classified request as '{classification}', injection_detected={injection_detected}"
+    )
+    
     return {
         **state,
         "sanitized_request": sanitized_request,
         "classification": classification,
         "injection_detected": injection_detected,
+        "confidence_score": confidence_score,
+        "agent_trace": trace,
     }

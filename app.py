@@ -67,6 +67,8 @@ if st.button("Run Triage Analysis"):
                 "escalation_required": None,
                 "recommended_team": None,
                 "escalation_reason": None,
+                "confidence_score": None,
+                "agent_trace": [],
                 "error": None,
             }
 
@@ -76,6 +78,9 @@ if st.button("Run Triage Analysis"):
 
         st.subheader("Classification")
         st.write(result["classification"])
+
+        st.subheader("Routing Confidence")
+        st.write(result.get("confidence_score", "Not available"))
 
         st.subheader("Escalation Decision")
         st.write("Escalation Required:", result.get("escalation_required", "Not available"))
@@ -87,6 +92,10 @@ if st.button("Run Triage Analysis"):
 
         st.subheader("Triage Summary")
         st.text(result["triage_summary"])
+
+        st.subheader("Agent Execution Trace")
+        for step in result.get("agent_trace", []):
+            st.write(f"- {step}")
 
         st.subheader("Safety Review")
         st.text(result["safety_review"])

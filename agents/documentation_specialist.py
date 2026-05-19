@@ -1,3 +1,5 @@
+from langsmith import trace
+
 from core.llm import llm
 
 
@@ -52,8 +54,12 @@ Rules:
     response = llm.invoke(prompt)
     content = response.content
 
+    trace = state.get("agent_trace") or []
+    trace.append("Documentation Specialist: generated structured triage summary and draft response.")
+    
     return {
         **state,
         "triage_summary": content,
-        "draft_response": "Draft included inside triage summary."
+        "agent_trace": trace,
+        "draft_response": "Draft included inside triage summary." 
     }
