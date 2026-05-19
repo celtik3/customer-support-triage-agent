@@ -78,9 +78,9 @@ if st.button("Run Triage Analysis"):
         st.write(result["classification"])
 
         st.subheader("Escalation Decision")
-        st.write("Escalation Required:", result["escalation_required"])
-        st.write("Recommended Team:", result["recommended_team"])
-        st.write("Reason:", result["escalation_reason"])
+        st.write("Escalation Required:", result.get("escalation_required", "Not available"))
+        st.write("Recommended Team:", result.get("recommended_team", "Not available"))
+        st.write("Reason:", result.get("escalation_reason", "Not available"))
 
         st.subheader("Sanitized Request")
         st.write(result["sanitized_request"])
