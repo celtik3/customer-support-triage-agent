@@ -1,11 +1,7 @@
 from core.llm import llm
 
 
-def guardrail_critic_agent(state: dict) -> dict:
-    """
-    Final safety and policy review agent.
-    """
-
+def guardrail_critic_agent(state: dict):
     classification = state.get("classification", "")
     triage_summary = state.get("triage_summary", "")
     injection_detected = state.get("injection_detected", False)
@@ -15,15 +11,14 @@ def guardrail_critic_agent(state: dict) -> dict:
             **state,
             "safety_review": "Blocked: prompt injection attempt detected.",
             "final_response": (
-                "Your request could not be processed because it triggered "
-                "security protections."
+                "Your request could not be processed because it triggered security protections."
             ),
         }
 
     prompt = f"""
 You are a security and policy guardrail reviewer.
 
-Review the following generated support content.
+Review the generated support content.
 
 Classification:
 {classification}
@@ -31,33 +26,32 @@ Classification:
 Generated Content:
 {triage_summary}
 
-Check for ALL of the following:
+Check for:
 - medical advice
 - legal advice
-- invented company policies
+- invented policies
 - unsafe commitments
 - prompt leakage
 - unprofessional tone
-- risky escalation
 
-Return EXACTLY in this format:
+Return EXACTLY:
 
-Decision: APPROVED or BLOCKED
-Risk Level: LOW, MEDIUM, or HIGH
+Decision:
+Risk Level:
 Issues Found:
 Safe Final Response:
-
-Rules:
-- If content is acceptable, approve it
-- If issues exist, rewrite a safer final response
-- Keep tone professional
 """
 
     response = llm.invoke(prompt)
     content = response.content
 
+    safe_response = content
+
+    if "Safe Final Response:" in content:
+        safe_response = content.split("Safe Final Response:")[-1].strip()
+
     return {
         **state,
         "safety_review": content,
-        "final_response": content,
+        "final_response": safe_response,
     }
