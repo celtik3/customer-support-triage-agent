@@ -21,100 +21,127 @@ INJECTION_PATTERNS = [
 
 
 def redact_pii(text: str) -> str:
-    """Redact simple PII patterns before sending text forward."""
     text = re.sub(r"[\w\.-]+@[\w\.-]+\.\w+", "[REDACTED_EMAIL]", text)
     text = re.sub(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", "[REDACTED_PHONE]", text)
+
     text = re.sub(
         r"\b(my name is|i am|i'm)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?",
         r"\1 [REDACTED_NAME]",
         text,
         flags=re.IGNORECASE,
     )
+
     return text
 
 
 def detect_prompt_injection(text: str) -> bool:
-    """Detect obvious prompt injection attempts."""
     lower_text = text.lower()
+
     for pattern in INJECTION_PATTERNS:
         if pattern in lower_text:
             return True
+
     return False
 
 
 def rule_based_classification(text: str) -> str | None:
     lower_text = text.lower()
 
-    health_safety_keywords = [
-        "severe allergy",
-        "allergy",
-        "allergic",
-        "anaphylaxis",
-        "peanut",
-        "hazard",
-        "unsafe",
-        "injury",
-        "emergency",
-        "seriously ill",
-        "exposed to certain foods",
-        "food exposure",
-        "medical risk",
-        "health risk",
+    security_keywords = [
+        "role-based access",
+        "restricted by user roles",
+        "permissions",
+        "access control",
+        "compliance",
+        "security",
+        "sensitive data",
+        "pii",
+        "secrets",
     ]
 
-    mobility_keywords = [
-        "wheelchair",
-        "mobility",
-        "walker",
-        "accessible",
-        "wheelchair-accessible transportation",
-        "accessible transportation",
-        "stairs",
+    data_integration_keywords = [
+        "salesforce",
+        "zendesk",
+        "jira",
+        "slack",
+        "database",
+        "api",
+        "crm",
+        "data warehouse",
+        "internal databases",
     ]
 
-    dietary_keywords = [
-        "low-sodium",
-        "diet",
-        "meal",
-        "food preference",
-        "vegetarian",
-        "vegan",
-        "gluten-free",
-        "dairy-free"
+    workflow_keywords = [
+        "automate",
+        "workflow",
+        "create tasks",
+        "summarize tickets",
+        "route tickets",
+        "follow-up",
+        "approval process",
     ]
 
-    for keyword in health_safety_keywords:
-        if keyword in lower_text:
-            return "health_safety"
+    ai_keywords = [
+        "ai assistant",
+        "llm",
+        "chatbot",
+        "summarize",
+        "generate",
+        "classify",
+        "rag",
+    ]
 
-    for keyword in mobility_keywords:
-        if keyword in lower_text:
-            return "mobility_accessibility"
+    deployment_keywords = [
+        "deploy",
+        "cloud",
+        "aws",
+        "azure",
+        "gcp",
+        "docker",
+        "kubernetes",
+        "production",
+    ]
 
-    for keyword in dietary_keywords:
+    for keyword in security_keywords:
         if keyword in lower_text:
-            return "dietary_constraint"
+            return "security_compliance"
+
+    for keyword in data_integration_keywords:
+        if keyword in lower_text:
+            return "data_integration"
+
+    for keyword in workflow_keywords:
+        if keyword in lower_text:
+            return "workflow_automation"
+
+    for keyword in ai_keywords:
+        if keyword in lower_text:
+            return "ai_llm_use_case"
+
+    for keyword in deployment_keywords:
+        if keyword in lower_text:
+            return "deployment_infrastructure"
 
     return None
 
 
 def classify_request(text: str) -> str:
-    """Use the LLM to classify the customer request."""
     prompt = f"""
-You are an intake router for a customer support triage system.
+You are an intake router for a forward-deployed AI engineering team.
 
-Classify the request into exactly one category:
+Classify the client request into exactly one category:
 
-- dietary_constraint
-- health_safety
-- behavioral_consideration
-- mobility_accessibility
-- communication_need
-- general_support
+- workflow_automation
+- data_integration
+- ai_llm_use_case
+- security_compliance
+- user_access_permissions
+- deployment_infrastructure
+- general_requirement
 
 Return only the category name.
 
-Customer request:
+Client request:
 {text}
 """
 
@@ -123,8 +150,6 @@ Customer request:
 
 
 def intake_router_agent(state: dict) -> dict:
-    """Main Intake Router agent node."""
-
     raw_request = state.get("raw_request", "")
 
     sanitized_request = redact_pii(raw_request)
@@ -153,7 +178,7 @@ def intake_router_agent(state: dict) -> dict:
     trace.append(
         f"Intake Router: classified request as '{classification}', injection_detected={injection_detected}"
     )
-    
+
     return {
         **state,
         "sanitized_request": sanitized_request,

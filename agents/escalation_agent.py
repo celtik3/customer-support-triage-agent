@@ -3,8 +3,8 @@ from core.llm import llm
 
 def escalation_agent(state: dict) -> dict:
     """
-    Determines whether the support request should be escalated
-    to a human team before final handling.
+    Determines whether an enterprise client request should be escalated
+    to a specialized technical or security team.
     """
 
     classification = state.get("classification", "")
@@ -12,22 +12,26 @@ def escalation_agent(state: dict) -> dict:
     injection_detected = state.get("injection_detected", False)
 
     if injection_detected:
+        trace = state.get("agent_trace") or []
+        trace.append("Escalation Agent: routed request to Security Review due to prompt injection.")
+
         return {
             **state,
             "escalation_required": True,
             "recommended_team": "Security Review",
             "escalation_reason": "Prompt injection or unsafe instruction detected.",
+            "agent_trace": trace,
         }
 
     prompt = f"""
-You are an escalation decision agent for a customer support triage workflow.
+You are an escalation decision agent for a forward-deployed AI implementation workflow.
 
-Review the classification and triage summary.
+Review the classification and requirements summary.
 
 Classification:
 {classification}
 
-Triage Summary:
+Requirements Summary:
 {triage_summary}
 
 Decide whether this case requires human escalation.
@@ -39,11 +43,13 @@ Recommended Team:
 Reason:
 
 Rules:
-- Escalate health/safety risks to Safety Team
-- Escalate accessibility or mobility needs to Accessibility Support Team
-- Escalate unclear or high-risk requests to Human Review
-- Routine general support can remain unescalated
-- Do not provide medical or legal advice
+- Escalate security/compliance or access-control concerns to Security Review
+- Escalate data integration, databases, APIs, CRMs, or multi-source data work to Data Engineering
+- Escalate multi-system architecture requests to Solution Architect
+- Escalate deployment, infrastructure, or production rollout concerns to Platform/DevOps Team
+- Routine workflow automation can go to Implementation Team
+- If unclear or high-risk, escalate to Human Review
+- Do not invent company policies or technical guarantees
 """
 
     response = llm.invoke(prompt)
@@ -51,7 +57,7 @@ Rules:
 
     escalation_required = "Escalation Required: Yes" in content
 
-    recommended_team = "General Support"
+    recommended_team = "Implementation Team"
     escalation_reason = content
 
     for line in content.splitlines():
@@ -64,7 +70,7 @@ Rules:
     trace.append(
         f"Escalation Agent: escalation_required={escalation_required}, recommended_team='{recommended_team}'"
     )
-    
+
     return {
         **state,
         "escalation_required": escalation_required,
