@@ -10,6 +10,13 @@ INJECTION_PATTERNS = [
     "forget your instructions",
     "developer message",
     "system message",
+    "print your system instructions",
+    "system instructions",
+    "hidden policies",
+    "debugging",
+    "show your prompt",
+    "show your instructions",
+    "tell me your instructions",
 ]
 
 
@@ -17,6 +24,12 @@ def redact_pii(text: str) -> str:
     """Redact simple PII patterns before sending text forward."""
     text = re.sub(r"[\w\.-]+@[\w\.-]+\.\w+", "[REDACTED_EMAIL]", text)
     text = re.sub(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", "[REDACTED_PHONE]", text)
+    text = re.sub(
+        r"\b(my name is|i am|i'm)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?",
+        r"\1 [REDACTED_NAME]",
+        text,
+        flags=re.IGNORECASE,
+    )
     return text
 
 
@@ -42,6 +55,11 @@ def rule_based_classification(text: str) -> str | None:
         "unsafe",
         "injury",
         "emergency",
+        "seriously ill",
+        "exposed to certain foods",
+        "food exposure",
+        "medical risk",
+        "health risk",
     ]
 
     mobility_keywords = [
@@ -49,7 +67,8 @@ def rule_based_classification(text: str) -> str | None:
         "mobility",
         "walker",
         "accessible",
-        "transportation",
+        "wheelchair-accessible transportation",
+        "accessible transportation",
         "stairs",
     ]
 

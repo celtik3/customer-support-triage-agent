@@ -43,6 +43,10 @@ Decision:
 Risk Level:
 Issues Found:
 Safe Final Response:
+
+- Do NOT include placeholders like [Your Name], [Your Position], or fake signatures
+- Final response should be 2-4 sentences maximum
+- Preserve important support needs such as allergy, mobility, and communication preferences when relevant
 """
 
     response = llm.invoke(prompt)
