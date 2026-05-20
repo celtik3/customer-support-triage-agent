@@ -240,3 +240,6 @@ This project was built as part of a forward-deployed engineering technical scree
 
 ### Security Guardrail Example
 ![Security Test](screenshots/security_test_output.png)
+
+## Architecture
+![Architecture Diagram](screenshots/architecture_diagram.png)
