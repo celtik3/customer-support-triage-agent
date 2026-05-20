@@ -6,6 +6,21 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from agents.guardrail_critic import guardrail_critic_agent
 
 
+def test_guardrail_blocks_injection():
+    state = {
+        "classification": "security_risk",
+        "triage_summary": "",
+        "injection_detected": True,
+        "agent_trace": []
+    }
+
+    result = guardrail_critic_agent(state)
+
+    assert "security protections" in result["final_response"]
+
+'''
+Previous manual testing version
+
 state = {
     "raw_request": "The customer has a severe peanut allergy.",
     "sanitized_request": "The customer has a severe peanut allergy.",
@@ -31,3 +46,4 @@ Draft Customer Response: Thank you for informing us. We will ensure separate foo
 result = guardrail_critic_agent(state)
 
 print(result["safety_review"])
+'''
