@@ -9,6 +9,22 @@ st.set_page_config(
 
 st.title("Multi-Agent Customer Support Triage System")
 
+st.sidebar.title("System Design")
+st.sidebar.markdown("""
+**Agents**
+1. Intake Router  
+2. Documentation Specialist  
+3. Escalation Agent  
+4. Guardrail Critic  
+
+**Guardrails**
+- PII redaction
+- Prompt injection detection
+- Safety-first routing
+- Human escalation recommendation
+- Final response review
+""")
+
 st.markdown("""
 This system demonstrates a multi-agent architecture for customer support triage.
 
@@ -76,29 +92,44 @@ if st.button("Run Triage Analysis"):
 
         st.success("Workflow completed.")
 
-        st.subheader("Classification")
-        st.write(result["classification"])
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "Overview",
+            "Triage Report",
+            "Agent Trace",
+            "Safety Review"
+        ])
 
-        st.subheader("Routing Confidence")
-        st.write(result.get("confidence_score", "Not available"))
+        with tab1:
+            st.subheader("Classification")
+            st.write(result.get("classification", "Not available"))
 
-        st.subheader("Escalation Decision")
-        st.write("Escalation Required:", result.get("escalation_required", "Not available"))
-        st.write("Recommended Team:", result.get("recommended_team", "Not available"))
-        st.write("Reason:", result.get("escalation_reason", "Not available"))
+            st.subheader("Routing Confidence")
+            st.write(result.get("confidence_score", "Not available"))
 
-        st.subheader("Sanitized Request")
-        st.write(result["sanitized_request"])
+            st.subheader("Escalation Decision")
+            st.write("Escalation Required:", result.get("escalation_required", "Not available"))
+            st.write("Recommended Team:", result.get("recommended_team", "Not available"))
+            st.write("Reason:", result.get("escalation_reason", "Not available"))
 
-        st.subheader("Triage Summary")
-        st.text(result["triage_summary"])
+            st.subheader("Final Response")
+            st.info(result.get("final_response", "No final response generated."))
 
-        st.subheader("Agent Execution Trace")
-        for step in result.get("agent_trace", []):
-            st.write(f"- {step}")
+        with tab2:
+            st.subheader("Sanitized Request")
+            st.write(result.get("sanitized_request", "Not available"))
 
-        st.subheader("Safety Review")
-        st.text(result["safety_review"])
+            st.subheader("Structured Triage Summary")
+            st.text(result.get("triage_summary", "No triage summary generated."))
 
-        st.subheader("Final Response")
-        st.text(result["final_response"])
+        with tab3:
+            st.subheader("Agent Execution Trace")
+            trace = result.get("agent_trace", [])
+            if trace:
+                for step_number, step in enumerate(trace, start=1):
+                    st.write(f"{step_number}. {step}")
+            else:
+                st.write("No trace available.")
+
+        with tab4:
+            st.subheader("Safety Review")
+            st.text(result.get("safety_review", "No safety review generated."))
